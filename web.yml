@@ -1,0 +1,44 @@
+---
+- hosts: qaserver
+  become: yes
+  ignore_errors: yes
+  tasks:
+    - name: Install package
+      package:
+        name: "{{ item }}"
+        state: present
+        with_items:
+          - unzip
+          - wget
+          - httpd
+    - name: Download
+      get_url: 
+        url: "https://github.com/utrains/static-resume/archive/refs/heads/main.zip"
+        dest: /tmp/main.zip"
+    - name:
+      unarchive:
+        src: "/tmp/main.zip"
+        dest: "/tmp"
+
+    - name: Copier les fichiers vers le répertoire de l'application
+      copy:
+        src: "/tmp/static-resume-main/iPortfolio/*"
+        dest: "/var/www/html/"
+        remote_src: yes
+      become: yes
+
+    - name: Démarrer le service HTTPD
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+      become: yes
+
+    - name: Attendre que l'application soit disponible
+      wait_for:
+        host: 127.0.0.1
+        port: 80
+        state: started
+        delay: 5
+        timeout: 60
+

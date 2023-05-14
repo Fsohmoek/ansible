@@ -1,0 +1,38 @@
+---
+- hosts: devserver
+  become: yes
+  ignore_errors: yes
+  vars:
+    pkg_name: httpd
+    username: Franki
+  tasks:
+    - name: Create group test
+      group:
+        name: test
+        system: yes
+        state: present 
+    - name: Creating user
+      user:
+        name: "{{ username }}"
+        comment: SOHMOE KAMTE Franki
+        shell: /bin/bash
+        group: test
+        #when: ansible_os_family == "Debian"
+    - name: create file
+      file:
+        path: /tmp/ansible.txt
+        state: touch
+        mode: '0600'
+    - name: Create directory
+      file:
+        path: /tmp/dir
+        state: directory
+        mode: '0777'
+    - name: Install apache
+      yum:
+        name: "{{ pkg_name }}"
+        state: present
+    - name: Install fonger
+      package:
+        name: finger
+        state: present
